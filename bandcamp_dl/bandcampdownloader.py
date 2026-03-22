@@ -172,15 +172,18 @@ class BandcampDownloader:
 
             self.logger.debug(" Current file:\n\t%s", filepath)
 
-            if album['art'] and not os.path.exists(dirname + "/cover.jpg"):
+            cover_path = dirname + "/cover.jpg"
+            if album['art'] and not os.path.exists(cover_path):
                 try:
-                    with open(dirname + "/cover.jpg", "wb") as f:
+                    with open(cover_path, "wb") as f:
                         r = self.session.get(album['art'], headers=self.headers)
                         f.write(r.content)
-                    self.album_art = dirname + "/cover.jpg"
+                    self.album_art = cover_path
                 except Exception as e:
                     print(e)
                     print("Couldn't download album art.")
+            elif os.path.exists(cover_path):
+                self.album_art = cover_path
 
             attempts = 0
             skip = False
