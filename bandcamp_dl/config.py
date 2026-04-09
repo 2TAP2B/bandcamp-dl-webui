@@ -44,7 +44,8 @@ class Config(dict):
                  "cover_quality": 0,
                  "untitled_path_from_slug": False,
                  "truncate_album": 0,
-                 "truncate_track": 0}
+                 "truncate_track": 0,
+                 "limit_req_per_minute": 0}
 
     def __init__(self, dict_=None):
         if dict_ is None:

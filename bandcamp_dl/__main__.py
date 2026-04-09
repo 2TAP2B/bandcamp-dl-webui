@@ -62,10 +62,12 @@ def main():
                         action='store_true', default=conf.no_confirm)
     parser.add_argument('--embed-genres', help='Embed album/track genres',
                         action='store_true', default=conf.embed_genres)
-    parser.add_argument('--truncate-album', metavar='LENGTH', type=int, default=0,
+    parser.add_argument('--truncate-album', metavar='LENGTH', type=int, default=conf.truncate_album,
                         help='Truncate album title to a maximum length. 0 for no limit.')
-    parser.add_argument('--truncate-track', metavar='LENGTH', type=int, default=0,
+    parser.add_argument('--truncate-track', metavar='LENGTH', type=int, default=conf.truncate_track,
                         help='Truncate track title to a maximum length. 0 for no limit.')
+    parser.add_argument('--limit-req-per-minute', type=int, default=conf.limit_req_per_minute,
+                        help='Limit the number of requests sent per minute. 0 for no limit.')
 
 
     arguments = parser.parse_args()
@@ -92,7 +94,7 @@ def main():
                      ('ok_chars', config.OK_CHARS), ('space_char', config.SPACE_CHAR)]:
         if not getattr(arguments, arg):
             setattr(arguments, arg, val)
-    bandcamp = Bandcamp()
+    bandcamp = Bandcamp(limit_req_per_minute=arguments.limit_req_per_minute)
 
     if arguments.artist and arguments.album:
         urls = Bandcamp.generate_album_url(arguments.artist, arguments.album, "album")

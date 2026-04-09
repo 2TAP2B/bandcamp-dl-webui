@@ -6,6 +6,7 @@ import logging
 import bs4
 import requests
 from requests.adapters import HTTPAdapter
+from requests_ratelimiter import LimiterAdapter
 from urllib3.util import create_urllib3_context
 from urllib.parse import urlparse, urlunparse, urljoin
 
@@ -51,17 +52,24 @@ DEFAULT_CIPHERS = ":".join(
 ctx.set_ciphers(DEFAULT_CIPHERS)
 
 class Bandcamp:
-    def __init__(self):
+    def __init__(self, limit_req_per_minute: int = 0):
         self.headers = {'User-Agent': f'bandcamp-dl/{__version__} '
                         f'(https://github.com/evolution0/bandcamp-dl)'}
         self.soup = None
         self.tracks = None
         self.logger = logging.getLogger("bandcamp-dl").getChild("Main")
         
-        # Mount the adapter with the custom SSL context to the session
         self.session = requests.Session()
-        self.adapter = SSLAdapter(ssl_context=ctx)
-        self.session.mount('https://', self.adapter)
+        # Mount the adapter with the custom SSL context to the session
+        self.ssl_adapter = SSLAdapter(ssl_context=ctx)
+        self.session.mount('https://', self.ssl_adapter)
+
+        if 0 < limit_req_per_minute:
+            # Mount the rate-limiting adapter to the session
+            self.rate_adapter = LimiterAdapter(per_minute=limit_req_per_minute)
+            self.session.mount('https://', self.rate_adapter)
+        else:
+            self.rate_adapter = None
 
     def parse(self, url: str, art: bool = True, lyrics: bool = False, genres: bool = False,
               debugging: bool = False, cover_quality: int = 0) -> dict or None:

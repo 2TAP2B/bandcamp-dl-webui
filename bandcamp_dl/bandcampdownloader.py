@@ -6,6 +6,7 @@ import shutil
 from mutagen import mp3
 from mutagen import id3
 import requests
+from  requests_ratelimiter import LimiterAdapter
 import slugify
 
 from bandcamp_dl import __version__
@@ -26,7 +27,15 @@ class BandcampDownloader:
         """
         self.headers = {'User-Agent': f'bandcamp-dl/{__version__} '
                         f'(https://github.com/evolution0/bandcamp-dl)'}
+
         self.session = requests.Session()
+        if 0 < config.limit_req_per_minute:
+            # Mount the rate-limiting adapter to the session
+            self.rate_adapter = LimiterAdapter(per_minute=config.limit_req_per_minute)
+            self.session.mount('https://', self.rate_adapter)
+        else:
+            self.rate_adapter = None
+
         self.logger = logging.getLogger("bandcamp-dl").getChild("Downloader")
 
         if type(urls) is str:
