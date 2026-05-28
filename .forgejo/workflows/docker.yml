@@ -17,6 +17,6 @@ jobs:
 
       - name: Build and push
         run: |
-          IMAGE=git.steltner.cloud/${{ gitea.repository }}:latest
+          IMAGE=git.steltner.cloud/${{ github.repository }}:latest
           docker build -t $IMAGE .
           docker push $IMAGE
