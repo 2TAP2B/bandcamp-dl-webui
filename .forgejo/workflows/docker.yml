@@ -22,6 +22,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Docker CLI
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends docker.io
+
       - name: Log in to container registry
         uses: docker/login-action@v3
         with:
