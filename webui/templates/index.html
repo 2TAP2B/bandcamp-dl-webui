@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bandcamp-dl</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #111;
+      --surface: #1c1c1e;
+      --surface2: #2c2c2e;
+      --border: #3a3a3c;
+      --text: #f2f2f7;
+      --muted: #8e8e93;
+      --accent: #0a84ff;
+      --green: #30d158;
+      --red: #ff453a;
+      --yellow: #ffd60a;
+      --radius: 12px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    header {
+      text-align: center;
+      padding: 24px 0 28px;
+    }
+    header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
+    header p  { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="url"] {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 1rem;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .15s;
+      min-width: 0;
+    }
+    input[type="url"]::placeholder { color: var(--muted); }
+    input[type="url"]:focus { border-color: var(--accent); }
+
+    button.primary {
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 12px 20px;
+      transition: opacity .15s;
+      white-space: nowrap;
+    }
+    button.primary:active { opacity: .75; }
+    button.primary:disabled { opacity: .4; cursor: default; }
+
+    .section-title {
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* ── Job card ── */
+    .job {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .job-header {
+      align-items: center;
+      cursor: pointer;
+      display: flex;
+      gap: 10px;
+      padding: 14px 16px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .badge {
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      padding: 3px 8px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .badge-queued  { background: rgba(142,142,147,.2); color: var(--muted); }
+    .badge-running { background: rgba(255,214,10,.18); color: var(--yellow); }
+    .badge-done    { background: rgba(48,209,88,.18);  color: var(--green); }
+    .badge-error   { background: rgba(255,69,58,.18);  color: var(--red); }
+
+    .job-label {
+      flex: 1;
+      font-size: 0.92rem;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .job-time {
+      color: var(--muted);
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Track list ── */
+    .track-list {
+      border-top: 1px solid var(--border);
+      display: none;
+      padding: 8px 0;
+    }
+    .track-list.open { display: block; }
+
+    .track-row {
+      align-items: center;
+      display: flex;
+      gap: 10px;
+      padding: 7px 16px;
+    }
+
+    .track-icon {
+      flex-shrink: 0;
+      font-size: 0.85rem;
+      width: 18px;
+      text-align: center;
+    }
+    .track-name {
+      flex: 1;
+      font-size: 0.88rem;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .track-status-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    /* ── Spinner ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block;
+      width: 13px; height: 13px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: 0.88rem;
+      padding: 24px;
+      text-align: center;
+    }
+
+    /* ── History ── */
+    .history-entry {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .history-header {
+      align-items: center;
+      cursor: pointer;
+      display: flex;
+      gap: 10px;
+      padding: 13px 16px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .history-label {
+      flex: 1;
+      font-size: 0.92rem;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .history-date {
+      color: var(--muted);
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+    .history-tracks {
+      border-top: 1px solid var(--border);
+      display: none;
+      padding: 8px 0;
+    }
+    .history-tracks.open { display: block; }
+
+    @media (min-width: 600px) {
+      body { padding: 24px; max-width: 720px; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>bandcamp-dl</h1>
+  <p>Paste an album or track URL to download</p>
+</header>
+
+<div class="card">
+  <form id="form">
+    <div class="input-row">
+      <input id="url-input" type="url" placeholder="https://artist.bandcamp.com/album/…"
+             autocomplete="off" autocorrect="off" spellcheck="false" required />
+      <button type="submit" class="primary" id="submit-btn">Download</button>
+    </div>
+  </form>
+</div>
+
+<p class="section-title">Queue</p>
+<div id="jobs-container">
+  <div class="empty-state" id="empty-msg">No downloads yet.</div>
+</div>
+
+<p class="section-title" style="margin-top:24px">History</p>
+<div id="history-container">
+  <div class="empty-state" id="history-empty-msg">No history yet.</div>
+</div>
+
+<script>
+  const form          = document.getElementById('form');
+  const urlInput      = document.getElementById('url-input');
+  const submitBtn     = document.getElementById('submit-btn');
+  const jobsCont      = document.getElementById('jobs-container');
+  const emptyMsg      = document.getElementById('empty-msg');
+  const historyCont   = document.getElementById('history-container');
+  const historyEmpty  = document.getElementById('history-empty-msg');
+
+  // ── Bootstrap ──────────────────────────────────────────────
+  fetch('/api/jobs')
+    .then(r => r.json())
+    .then(jobs => jobs.forEach(j => renderJob(j, false)));
+
+  fetch('/api/history')
+    .then(r => r.json())
+    .then(entries => entries.forEach(e => renderHistoryEntry(e)));
+
+  // ── Submit ─────────────────────────────────────────────────
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const url = urlInput.value.trim();
+    if (!url) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '…';
+    try {
+      const res  = await fetch('/api/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      if (data.error) { alert(data.error); return; }
+      urlInput.value = '';
+      const job = { id: data.job_id, url, label: labelFromUrl(url),
+                    status: 'queued', tracks: [], created: new Date().toLocaleTimeString() };
+      prependJob(job);
+      streamJob(data.job_id);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Download';
+    }
+  });
+
+  // ── Job rendering ──────────────────────────────────────────
+  function prependJob(job) {
+    emptyMsg.style.display = 'none';
+    const el = buildJobEl(job);
+    jobsCont.prepend(el);
+    el.querySelector('.track-list').classList.add('open');
+  }
+
+  function renderJob(job, prepend = true) {
+    emptyMsg.style.display = 'none';
+    const el = buildJobEl(job);
+    prepend ? jobsCont.prepend(el) : jobsCont.appendChild(el);
+    const list = el.querySelector('.track-list');
+    job.tracks.forEach(t => appendTrackRow(list, t.name, t.status));
+    if (job.tracks.length) list.classList.add('open');
+    if (job.status === 'running') streamJob(job.id);
+  }
+
+  function buildJobEl(job) {
+    const div = document.createElement('div');
+    div.className = 'job';
+    div.id = `job-${job.id}`;
+    div.innerHTML = `
+      <div class="job-header">
+        <span class="badge badge-${job.status}">${job.status}</span>
+        <span class="job-label" title="${esc(job.url)}">${esc(job.label || job.url)}</span>
+        <span class="job-time">${job.created}</span>
+      </div>
+      <div class="track-list"></div>
+    `;
+    div.querySelector('.job-header').addEventListener('click', () => {
+      div.querySelector('.track-list').classList.toggle('open');
+    });
+    return div;
+  }
+
+  // ── Streaming ──────────────────────────────────────────────
+  function streamJob(jobId) {
+    const es = new EventSource(`/api/jobs/${jobId}/stream`);
+    es.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      const jobEl = document.getElementById(`job-${jobId}`);
+      if (!jobEl) { es.close(); return; }
+
+      if (data.type === 'track') {
+        upsertTrackRow(jobEl.querySelector('.track-list'), data.name, data.status);
+      } else if (data.type === 'status') {
+        updateBadge(jobEl, data.status);
+        if (data.status === 'done') {
+          // Refresh history
+          fetch('/api/history')
+            .then(r => r.json())
+            .then(entries => {
+              historyCont.innerHTML = '';
+              historyEmpty.style.display = entries.length ? 'none' : '';
+              if (entries.length) historyCont.appendChild(historyEmpty);
+              entries.forEach(en => renderHistoryEntry(en));
+            });
+        }
+        if (data.status === 'done' || data.status === 'error') es.close();
+      }
+    };
+    es.onerror = () => es.close();
+  }
+
+  // ── Track rows ─────────────────────────────────────────────
+  function trackIcon(status) {
+    if (status === 'done' || status === 'skipped') return `<span style="color:var(--green)">✓</span>`;
+    if (status === 'error') return `<span style="color:var(--red)">✗</span>`;
+    return `<span class="spinner"></span>`;
+  }
+
+  function trackStatusLabel(status) {
+    if (status === 'done')       return '';
+    if (status === 'skipped')    return 'already exists';
+    if (status === 'encoding')   return 'encoding…';
+    if (status === 'downloading') return 'downloading…';
+    return status;
+  }
+
+  function appendTrackRow(listEl, name, status) {
+    const row = document.createElement('div');
+    row.className = 'track-row';
+    row.dataset.name = name;
+    row.innerHTML = `
+      <span class="track-icon">${trackIcon(status)}</span>
+      <span class="track-name">${esc(name)}</span>
+      <span class="track-status-label">${trackStatusLabel(status)}</span>
+    `;
+    listEl.appendChild(row);
+    return row;
+  }
+
+  function upsertTrackRow(listEl, name, status) {
+    let row = listEl.querySelector(`[data-name="${CSS.escape(name)}"]`);
+    if (!row) {
+      row = appendTrackRow(listEl, name, status);
+    } else {
+      row.querySelector('.track-icon').innerHTML = trackIcon(status);
+      row.querySelector('.track-status-label').textContent = trackStatusLabel(status);
+    }
+    // Only show "downloading" and above phases → ensure list is open
+    listEl.classList.add('open');
+    return row;
+  }
+
+  function updateBadge(jobEl, status) {
+    const badge = jobEl.querySelector('.badge');
+    badge.className = `badge badge-${status}`;
+    badge.textContent = status;
+  }
+
+  // ── History ────────────────────────────────────────────────
+  function renderHistoryEntry(entry) {
+    historyEmpty.style.display = 'none';
+    const div = document.createElement('div');
+    div.className = 'history-entry';
+    div.innerHTML = `
+      <div class="history-header">
+        <span style="color:var(--green);font-size:1rem">✓</span>
+        <span class="history-label" title="${esc(entry.url)}">${esc(entry.label || entry.url)}</span>
+        <span class="history-date">${entry.finished}</span>
+      </div>
+      <div class="history-tracks"></div>
+    `;
+    const tracksEl = div.querySelector('.history-tracks');
+    (entry.tracks || []).forEach(t => appendTrackRow(tracksEl, t.name, 'done'));
+    div.querySelector('.history-header').addEventListener('click', () => {
+      tracksEl.classList.toggle('open');
+    });
+    historyCont.appendChild(div);
+  }
+
+  // ── Helpers ────────────────────────────────────────────────
+  function labelFromUrl(url) {
+    try {
+      const u = new URL(url);
+      const artist = u.hostname.split('.')[0];
+      const parts  = u.pathname.split('/').filter(Boolean);
+      const idx    = parts.findIndex(p => p === 'album' || p === 'track');
+      if (idx !== -1 && parts[idx + 1])
+        return `${artist} – ${parts[idx + 1].replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}`;
+      return artist;
+    } catch { return url; }
+  }
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>
