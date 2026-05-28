@@ -1,42 +1,22 @@
-name: Build & Push Docker Image
+name: Build and Push
 
 on:
   push:
-    branches:
-      - main
-    tags:
-      - 'v*'
-
-env:
-  REGISTRY: git.steltner.cloud
-  IMAGE: git.steltner.cloud/2tap2b/bandcamp-dl-webui
+    branches: [main]
 
 jobs:
-  build-push:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Log in to container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ forgejo.actor }}
-          password: ${{ secrets.FORGEJO_TOKEN }}
+      - name: Login to registry
+        run: |
+          echo "${{ secrets.REGISTRY_TOKEN }}" | \
+          docker login git.steltner.cloud -u ${{ vars.REGISTRY_USER }} --password-stdin
 
       - name: Build and push
         run: |
-          IMAGE="${{ env.IMAGE }}"
-          # Always tag :latest on main; also tag the short SHA
-          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          REF="${{ github.ref_name }}"
-
-          docker build -t "${IMAGE}:latest" -t "${IMAGE}:${SHA}" -t "${IMAGE}:${REF}" .
-          docker push "${IMAGE}:latest"
-          docker push "${IMAGE}:${SHA}"
-          docker push "${IMAGE}:${REF}"
+          IMAGE=git.steltner.cloud/${{ gitea.repository }}:latest
+          docker build -t $IMAGE .
+          docker push $IMAGE
