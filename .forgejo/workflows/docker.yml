@@ -7,13 +7,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: catthehacker/ubuntu:act-22.04
+      options: -v /var/run/docker.sock:/var/run/docker.sock
     steps:
       - uses: actions/checkout@v4
 
       - name: Login to registry
         run: |
           echo "${{ secrets.REGISTRY_TOKEN }}" | \
-          docker login git.steltner.cloud -u ${{ vars.REGISTRY_USER }} --password-stdin
+          docker login git.steltner.cloud -u 2tap2b --password-stdin
 
       - name: Build and push
         run: |
