@@ -12,25 +12,24 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: docker:cli
-    # No DinD service needed — the runner injects DOCKER_HOST pointing to
-    # the compose DinD sidecar via host-gateway. docker:cli just uses it.
+    # No actions/checkout — it uses github.server_url context (= http://server:3000,
+    # the internal runner connection URL) which is unreachable from job containers.
+    # All $GITHUB_* shell env vars are set correctly by runner.envs.
     steps:
       - name: Checkout
         run: |
           apk add --no-cache git
-          git clone $GITHUB_SERVER_URL/${{ github.repository }} repo
-          cd repo
-          git checkout ${{ github.sha }}
+          git clone "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" repo
+          cd repo && git checkout "$GITHUB_SHA"
 
       - name: Build and push
         run: |
-          REF="${{ github.ref }}"
-          case "$REF" in
-            refs/tags/v*) TAG="${REF#refs/tags/v}" ;;
+          case "$GITHUB_REF" in
+            refs/tags/v*) TAG="${GITHUB_REF#refs/tags/v}" ;;
             *)            TAG="latest" ;;
           esac
-          IMAGE=git.steltner.cloud/${{ github.repository }}
-          echo "${{ secrets.CR_PAT }}" | \
-            docker login git.steltner.cloud -u ${{ github.repository_owner }} --password-stdin
+          IMAGE="git.steltner.cloud/$GITHUB_REPOSITORY"
+          echo "${{ secrets.FORGEJO_TOKEN }}" | \
+            docker login git.steltner.cloud -u "$GITHUB_REPOSITORY_OWNER" --password-stdin
           docker build -t "${IMAGE}:${TAG}" repo/
           docker push "${IMAGE}:${TAG}"
