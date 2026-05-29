@@ -18,7 +18,7 @@ jobs:
       - name: Checkout
         run: |
           apk add --no-cache git
-          git clone ${{ github.server_url }}/${{ github.repository }} repo
+          git clone $GITHUB_SERVER_URL/${{ github.repository }} repo
           cd repo
           git checkout ${{ github.sha }}
 
@@ -30,7 +30,7 @@ jobs:
             *)            TAG="latest" ;;
           esac
           IMAGE=git.steltner.cloud/${{ github.repository }}
-          echo "${{ secrets.FORGEJO_TOKEN }}" | \
+          echo "${{ secrets.CR_PAT }}" | \
             docker login git.steltner.cloud -u ${{ github.repository_owner }} --password-stdin
           docker build -t "${IMAGE}:${TAG}" repo/
           docker push "${IMAGE}:${TAG}"
