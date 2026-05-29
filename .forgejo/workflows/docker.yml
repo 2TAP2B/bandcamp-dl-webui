@@ -11,7 +11,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        run: |
+          git clone ${{ github.server_url }}/${{ github.repository }} repo
+          cd repo
+          git checkout ${{ github.sha }}
 
       - name: Build and push
         run: |
@@ -24,5 +28,5 @@ jobs:
           IMAGE=git.steltner.cloud/${{ github.repository }}
           echo "${{ secrets.FORGEJO_TOKEN }}" | \
             docker login git.steltner.cloud -u ${{ github.repository_owner }} --password-stdin
-          docker build -t "${IMAGE}:${TAG}" .
+          docker build -t "${IMAGE}:${TAG}" repo/
           docker push "${IMAGE}:${TAG}"
