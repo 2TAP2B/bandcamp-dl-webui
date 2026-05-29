@@ -161,7 +161,9 @@ def _run(job_id: str, url: str):
         jobs[job_id]["status"] = final
         snapshot_tracks = list(jobs[job_id]["tracks"])
 
-    if final == "done":
+    # Save to history if job completed (with or without parsed track events)
+    finished_tracks = [t for t in snapshot_tracks if t["status"] == "done"]
+    if final == "done" or finished_tracks:
         _save_history_entry({
             "url": url,
             "label": _album_label(url),
@@ -208,6 +210,17 @@ def list_jobs():
 @app.route("/api/history")
 def get_history():
     return jsonify(_load_history())
+
+
+@app.route("/api/history", methods=["DELETE"])
+def clear_history():
+    try:
+        path = _history_path()
+        if os.path.exists(path):
+            os.remove(path)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    return jsonify({"ok": True})
 
 
 @app.route("/api/jobs/<job_id>/stream")

@@ -253,7 +253,7 @@
   <div class="empty-state" id="empty-msg">No downloads yet.</div>
 </div>
 
-<p class="section-title" style="margin-top:24px">History</p>
+<p class="section-title" style="margin-top:24px">History <button id="clear-history-btn" style="float:right;background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:0.7rem;padding:2px 8px;">Clear</button></p>
 <div id="history-container">
   <div class="empty-state" id="history-empty-msg">No history yet.</div>
 </div>
@@ -275,6 +275,14 @@
   fetch('/api/history')
     .then(r => r.json())
     .then(entries => entries.forEach(e => renderHistoryEntry(e)));
+
+  document.getElementById('clear-history-btn').addEventListener('click', async () => {
+    if (!confirm('Clear all history?')) return;
+    await fetch('/api/history', { method: 'DELETE' });
+    historyCont.innerHTML = '';
+    historyCont.appendChild(historyEmpty);
+    historyEmpty.style.display = '';
+  });
 
   // ── Submit ─────────────────────────────────────────────────
   form.addEventListener('submit', async (e) => {
