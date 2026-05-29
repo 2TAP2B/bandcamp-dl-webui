@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         run: |
           apk add --no-cache git
-          git clone "$FORGEJO_SERVER_URL/$GITHUB_REPOSITORY" repo
+          git clone "https://git.steltner.cloud/$GITHUB_REPOSITORY" repo
           cd repo && git checkout "$GITHUB_SHA"
 
       - name: Build and push
