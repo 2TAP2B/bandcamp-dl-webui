@@ -6,45 +6,23 @@ on:
       - main
     tags:
       - "v*"
-  pull_request:
-    branches:
-      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set image tag
-        id: meta
+      - name: Build and push
         run: |
-          IMAGE=git.steltner.cloud/${{ gitea.repository_owner }}/${{ gitea.event.repository.name }}
-          REF="${{ gitea.ref }}"
+          REF="${{ github.ref }}"
           if [[ "$REF" == refs/tags/v* ]]; then
             TAG="${REF#refs/tags/v}"
           else
             TAG="latest"
           fi
-          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
-          echo "tag=${TAG}"     >> "$GITHUB_OUTPUT"
-
-      - name: Log in to registry
-        uses: docker/login-action@v3
-        with:
-          registry: git.steltner.cloud
-          username: ${{ gitea.repository_owner }}
-          password: ${{ secrets.FORGEJO_TOKEN }}
-
-      - name: Build & push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: ${{ gitea.event_name != 'pull_request' }}
-          tags: |
-            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}
-          labels: |
-            org.opencontainers.image.source=https://git.steltner.cloud/${{ gitea.repository }}
-            org.opencontainers.image.revision=${{ gitea.sha }}
+          IMAGE=git.steltner.cloud/${{ github.repository }}
+          echo "${{ secrets.FORGEJO_TOKEN }}" | \
+            docker login git.steltner.cloud -u ${{ github.repository_owner }} --password-stdin
+          docker build -t "${IMAGE}:${TAG}" .
+          docker push "${IMAGE}:${TAG}"
