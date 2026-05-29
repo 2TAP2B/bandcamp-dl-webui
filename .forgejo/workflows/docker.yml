@@ -10,23 +10,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: docker:cli
     steps:
       - name: Checkout
         run: |
+          apk add --no-cache git
           git clone ${{ github.server_url }}/${{ github.repository }} repo
           cd repo
           git checkout ${{ github.sha }}
-    container:
-      image: docker:cli
+
       - name: Build and push
         run: |
-          export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
           REF="${{ github.ref }}"
-          if [[ "$REF" == refs/tags/v* ]]; then
-            TAG="${REF#refs/tags/v}"
-          else
-            TAG="latest"
-          fi
+          case "$REF" in
+            refs/tags/v*) TAG="${REF#refs/tags/v}" ;;
+            *)            TAG="latest" ;;
+          esac
           IMAGE=git.steltner.cloud/${{ github.repository }}
           echo "${{ secrets.FORGEJO_TOKEN }}" | \
             docker login git.steltner.cloud -u ${{ github.repository_owner }} --password-stdin
