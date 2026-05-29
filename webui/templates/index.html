@@ -349,6 +349,8 @@
 
       if (data.type === 'track') {
         upsertTrackRow(jobEl.querySelector('.track-list'), data.name, data.status);
+      } else if (data.type === 'log') {
+        appendLogRow(jobEl.querySelector('.track-list'), data.line);
       } else if (data.type === 'status') {
         updateBadge(jobEl, data.status);
         if (data.status === 'done') {
@@ -381,6 +383,14 @@
     if (status === 'encoding')   return 'encoding…';
     if (status === 'downloading') return 'downloading…';
     return status;
+  }
+
+  function appendLogRow(listEl, line) {
+    const row = document.createElement('div');
+    row.style.cssText = 'padding:4px 16px;font-size:0.78rem;color:#ff453a;font-family:monospace;word-break:break-all;';
+    row.textContent = line;
+    listEl.appendChild(row);
+    listEl.classList.add('open');
   }
 
   function appendTrackRow(listEl, name, status) {

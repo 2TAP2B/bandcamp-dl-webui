@@ -141,6 +141,8 @@ def _run(job_id: str, url: str):
                     with jobs_lock:
                         _upsert_track(job_id, evt["name"], evt["status"])
                     _notify(job_id, evt)
+                elif token.strip():
+                    _notify(job_id, {"type": "log", "line": token.strip()})
         # flush remainder
         if buf:
             evt = _parse_token(buf.decode("utf-8", errors="replace"))
