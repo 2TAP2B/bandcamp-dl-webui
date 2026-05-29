@@ -12,14 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: docker:cli
-    services:
-      dind:
-        image: docker:dind
-        options: --privileged
-        env:
-          DOCKER_TLS_CERTDIR: ""
-    env:
-      DOCKER_HOST: tcp://dind:2375
+    # No DinD service needed — the runner injects DOCKER_HOST pointing to
+    # the compose DinD sidecar via host-gateway. docker:cli just uses it.
     steps:
       - name: Checkout
         run: |
