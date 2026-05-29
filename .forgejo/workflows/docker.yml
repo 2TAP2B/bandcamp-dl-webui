@@ -19,6 +19,7 @@ jobs:
 
       - name: Build and push
         run: |
+          export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
           REF="${{ github.ref }}"
           if [[ "$REF" == refs/tags/v* ]]; then
             TAG="${REF#refs/tags/v}"
