@@ -16,7 +16,8 @@ jobs:
           git clone ${{ github.server_url }}/${{ github.repository }} repo
           cd repo
           git checkout ${{ github.sha }}
-
+    container:
+      image: docker:cli
       - name: Build and push
         run: |
           export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
