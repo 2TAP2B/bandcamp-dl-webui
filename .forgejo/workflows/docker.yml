@@ -12,6 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: docker:cli
+    services:
+      dind:
+        image: docker:dind
+        options: --privileged
+        env:
+          DOCKER_TLS_CERTDIR: ""
+    env:
+      DOCKER_HOST: tcp://dind:2375
     steps:
       - name: Checkout
         run: |
