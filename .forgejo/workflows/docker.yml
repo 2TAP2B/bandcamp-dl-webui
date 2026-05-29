@@ -31,5 +31,5 @@ jobs:
           IMAGE="git.steltner.cloud/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')"
           echo "${{ secrets.FORGEJO_TOKEN }}" | \
             docker login git.steltner.cloud -u "$GITHUB_REPOSITORY_OWNER" --password-stdin
-          docker build -t "${IMAGE}:${TAG}" repo/
+          docker build --no-cache -t "${IMAGE}:${TAG}" repo/
           docker push "${IMAGE}:${TAG}"
