@@ -28,7 +28,7 @@ jobs:
             refs/tags/v*) TAG="${GITHUB_REF#refs/tags/v}" ;;
             *)            TAG="latest" ;;
           esac
-          IMAGE="git.steltner.cloud/$GITHUB_REPOSITORY"
+          IMAGE="git.steltner.cloud/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')"
           echo "${{ secrets.FORGEJO_TOKEN }}" | \
             docker login git.steltner.cloud -u "$GITHUB_REPOSITORY_OWNER" --password-stdin
           docker build -t "${IMAGE}:${TAG}" repo/

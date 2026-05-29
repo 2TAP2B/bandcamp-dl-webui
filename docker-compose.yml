@@ -1,6 +1,6 @@
 services:
   bandcamp-dl:
-    build: .
+    image: git.steltner.cloud/2tap2b/bandcamp-dl-webui:latest
     ports:
       - "5000:5000"
     user: "1000:1000"
