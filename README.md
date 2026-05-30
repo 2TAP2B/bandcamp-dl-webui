@@ -27,7 +27,7 @@ docker run -d \
   -v /path/to/your/music:/downloads \
   -e DOWNLOAD_DIR=/downloads \
   --restart unless-stopped \
-  git.steltner.cloud/2tap2b/bandcamp-dl-webui:latest
+  ghcr.io/2tap2b/bandcamp-dl-webui:latest
 ```
 
 Replace `/path/to/your/music` with the local directory where you want downloads saved.
@@ -39,7 +39,7 @@ Create a `docker-compose.yml`:
 ```yaml
 services:
   bandcamp-dl:
-    image: git.steltner.cloud/2tap2b/bandcamp-dl-webui:latest
+    image: ghcr.io/2tap2b/bandcamp-dl-webui:latest
     ports:
       - "5000:5000"
     volumes:
@@ -62,6 +62,7 @@ Open [http://localhost:5000](http://localhost:5000) in your browser.
 ```bash
 git clone <this-repo>
 cd bandcamp-dl
+mount your music folder into container
 docker compose up -d --build
 ```
 
