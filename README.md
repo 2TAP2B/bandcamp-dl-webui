@@ -57,6 +57,29 @@ docker compose up -d
 
 Open [http://localhost:5000](http://localhost:5000) in your browser.
 
+---
+
+## Install as App (PWA)
+
+bandcamp-dl Web UI is a full Progressive Web App — it can be installed on any device for a native app-like experience.
+
+### Desktop (Chrome / Edge)
+1. Open the app in Chrome or Edge
+2. Click the **install icon** (⊕) in the address bar, or open the browser menu → *Install bandcamp-dl*
+3. The app opens in its own window, no browser UI
+
+### Android
+1. Open the app in Chrome
+2. Tap the browser menu → *Add to Home screen*
+3. Confirm — the app icon appears on your home screen and opens full-screen
+
+### iOS (Safari)
+1. Open the app in Safari
+2. Tap the **Share** button → *Add to Home Screen*
+3. Confirm — launches without Safari UI
+
+> The service worker caches the shell so the UI loads instantly even with a slow connection. API calls (downloads, history) always go to the server.
+
 ### Build from source
 
 ```bash

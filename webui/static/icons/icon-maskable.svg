@@ -1,5 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" fill="#111111"/>
-  <text x="256" y="340" font-family="system-ui,sans-serif" font-size="280"
-        font-weight="bold" text-anchor="middle" fill="#0a84ff">↓</text>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Maskable icon: full-bleed square background, icon centred within safe zone -->
+<svg
+   width="500"
+   height="500"
+   viewBox="0 0 500 500"
+   fill="none"
+   stroke="currentColor"
+   stroke-width="2"
+   stroke-linecap="round"
+   stroke-linejoin="round"
+   version="1.1"
+   xmlns="http://www.w3.org/2000/svg">
+  <!-- Full-bleed background -->
+  <rect width="500" height="500" fill="#cc00ff"/>
+  <!-- Icon scaled to 80% safe zone (40px inset each side) -->
+  <g transform="translate(40,40) scale(0.84)">
+    <g transform="matrix(12.499953,0,0,12.499953,0.0009492,0.0009492)">
+      <circle
+         style="opacity:0.937506;fill:#cc00ff;stroke:#333333;stroke-width:2.485;stroke-dasharray:none"
+         cx="20"
+         cy="20"
+         r="18.757576" />
+      <g
+         transform="translate(46.876254,-41.257525)"
+         style="stroke:#333333">
+        <path
+           d="m -39.892139,66.544315 a 3.75,3.75 0 1 0 7.5,0 3.75,3.75 0 0 0 -7.5,0"
+           style="fill:none;stroke:#333333;stroke-width:2.5" />
+        <path
+           d="m -32.392139,66.544315 v -16.25 h 12.5 v 8.75"
+           style="fill:none;stroke:#333333;stroke-width:2.5" />
+        <path
+           d="m -32.392139,55.294315 h 12.5"
+           style="fill:none;stroke:#333333;stroke-width:2.5" />
+        <path
+           d="m -21.142139,72.794315 4.1875,-4.105 a 2.67875,2.67875 0 0 0 0.0063,-3.83875 2.8025,2.8025 0 0 0 -3.91125,-0.0075 l -0.28,0.275 -0.27875,-0.275 a 2.8025,2.8025 0 0 0 -3.91,-0.0075 2.67875,2.67875 0 0 0 -0.0075,3.83875 l 4.19375,4.12"
+           style="fill:none;stroke:#333333;stroke-width:2.5" />
+      </g>
+    </g>
+  </g>
 </svg>
